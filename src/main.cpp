@@ -17,8 +17,8 @@ using namespace std;
 using namespace cv;
 
 //30 colors
-int SizePaintdotnetPallet = 30;
-int PaintdotnetPallet[][3] = {
+const int SizePaintdotnetPallet = 30;
+const int PaintdotnetPallet[][3] = {
 	{64, 64, 64},
 	{128, 128, 128},
 	{255, 0, 0},
@@ -55,9 +55,9 @@ int get_pallet_idx(uint8_t* src)
 {
 	for(int i=0;i<SizePaintdotnetPallet;++i){
 		if(
-			*(src+0) == PaintdotnetPallet[i][0] &&
+			*(src+2) == PaintdotnetPallet[i][0] &&
 			*(src+1) == PaintdotnetPallet[i][1] &&
-			*(src+2) == PaintdotnetPallet[i][2]
+			*(src+0) == PaintdotnetPallet[i][2]
 			){
 			return i;
 		}
@@ -96,15 +96,16 @@ vector<vector<int>> get_masked_label_average(Mat* m_color, Mat* m_mask)
 		int r = 0;
 		int g = 0;
 		int b = 0;
+		printf("%02d num_pixel = %d\n", i, buf[i].size()/3);
 		for(int j=0;j<buf[i].size()/3;++j){
-			r += buf[i][j*3+0];
+			b += buf[i][j*3+0];
 			g += buf[i][j*3+1];
-			b += buf[i][j*3+2];
+			r += buf[i][j*3+2];
 		}
 		vector<int> rgb;
-		rgb.push_back((int)(r / buf[i].size()/3));
-		rgb.push_back((int)(g / buf[i].size()/3));
-		rgb.push_back((int)(b / buf[i].size()/3));
+		rgb.push_back((int)(r / (buf[i].size()/3)));
+		rgb.push_back((int)(g / (buf[i].size()/3)));
+		rgb.push_back((int)(b / (buf[i].size()/3)));
 		ave.push_back(rgb);
 	}
 	return ave;
@@ -132,8 +133,19 @@ int main(int argc, const char** argv)
     _le << "invalid path:" << args.path_mask;
     return 1;
   }
+
+	vector<vector<int>> label_rgb;
+	label_rgb = get_masked_label_average(&m_color, &m_mask);
+	for(int i=0;i<SizePaintdotnetPallet;++i){
+		if(label_rgb[i].size() == 0){
+			printf("%02d\n", i);
+		}else{
+			printf("%02d % 3d, % 3d, % 3d\n", i, label_rgb[i][0], label_rgb[i][1], label_rgb[i][2]);
+		}
+	}
+
 	if(args.path_output.size() > 0){
-		imwrite(args.path_output, *(m_send.get()));
+		//imwrite(args.path_output, *(m_send.get()));
 	}
 	
   return 0;
