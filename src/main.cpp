@@ -65,12 +65,13 @@ int get_pallet_idx(uint8_t* src)
 	return -1;
 }
 
-vector<vector<int>> get_masked_label_average(Mat* m_color, Mat* m_mask)
+vector<vector<int>> get_masked_label_average(Mat* m_color, Mat* m_mask, Mat* m_out)
 {
 	int w = m_color->cols;
 	int h = m_color->rows;
 	uint8_t* p_color = (uint8_t*)m_color->ptr();
 	uint8_t* p_mask = (uint8_t*)m_mask->ptr();
+	uint8_t* p_out = m_out == NULL?NULL:(uint8_t*)m_out->ptr();
 	vector<vector<int>> buf;
 	for(int i=0;i<SizePaintdotnetPallet;++i){
 		buf.push_back(vector<int>());
@@ -84,6 +85,11 @@ vector<vector<int>> get_masked_label_average(Mat* m_color, Mat* m_mask)
 				buf[pallet].push_back(*(p_color+idx+0));
 				buf[pallet].push_back(*(p_color+idx+1));
 				buf[pallet].push_back(*(p_color+idx+2));
+				if(p_out != NULL){
+					*(p_out+idx+0) = pallet;
+					*(p_out+idx+1) = pallet;
+					*(p_out+idx+2) = pallet;
+				}
 			}
 		}
 	}
@@ -134,8 +140,10 @@ int main(int argc, const char** argv)
     return 1;
   }
 
+	Mat m_out(m_mask.rows, m_mask.cols, CV_8UC3);
+	m_out.setTo(Scalar(255, 255, 255));
 	vector<vector<int>> label_rgb;
-	label_rgb = get_masked_label_average(&m_color, &m_mask);
+	label_rgb = get_masked_label_average(&m_color, &m_mask, &m_out);
 	for(int i=0;i<SizePaintdotnetPallet;++i){
 		if(label_rgb[i].size() == 0){
 			printf("%02d\n", i);
@@ -145,7 +153,7 @@ int main(int argc, const char** argv)
 	}
 
 	if(args.path_output.size() > 0){
-		//imwrite(args.path_output, *(m_send.get()));
+		imwrite(args.path_output, m_out);
 	}
 	
   return 0;
