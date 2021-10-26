@@ -67,9 +67,9 @@ int get_pallet_idx(uint8_t* src)
 
 vector<vector<int>> get_masked_label_average(Mat* m_color, Mat* m_mask, Mat* m_out)
 {
-	int w = m_color->cols;
-	int h = m_color->rows;
-	uint8_t* p_color = (uint8_t*)m_color->ptr();
+	int w = m_mask->cols;
+	int h = m_mask->rows;
+	uint8_t* p_color = (uint8_t*)(m_color == NULL?NULL:m_color->ptr());
 	uint8_t* p_mask = (uint8_t*)m_mask->ptr();
 	uint8_t* p_out = m_out == NULL?NULL:(uint8_t*)m_out->ptr();
 	vector<vector<int>> buf;
@@ -82,9 +82,11 @@ vector<vector<int>> get_masked_label_average(Mat* m_color, Mat* m_mask, Mat* m_o
 			int pallet = get_pallet_idx(p_mask+idx);
 			if(pallet >= 0){
 				vector<int> color;
-				buf[pallet].push_back(*(p_color+idx+0));
-				buf[pallet].push_back(*(p_color+idx+1));
-				buf[pallet].push_back(*(p_color+idx+2));
+				if(p_color != NULL){
+					buf[pallet].push_back(*(p_color+idx+0));
+					buf[pallet].push_back(*(p_color+idx+1));
+					buf[pallet].push_back(*(p_color+idx+2));
+				}
 				if(p_out != NULL){
 					*(p_out+idx+0) = pallet;
 					*(p_out+idx+1) = pallet;
@@ -129,12 +131,7 @@ int main(int argc, const char** argv)
   args.print(ss_args);
   _li << ss_args.str();
 
-  Mat m_color = imread(args.path_color.c_str());
   Mat m_mask = imread(args.path_mask.c_str());
-  if(m_color.cols == 0){
-    _le << "invalid path:" << args.path_color;
-    return 1;
-  }
   if(m_mask.cols == 0){
     _le << "invalid path:" << args.path_mask;
     return 1;
@@ -143,7 +140,17 @@ int main(int argc, const char** argv)
 	Mat m_out(m_mask.rows, m_mask.cols, CV_8UC3);
 	m_out.setTo(Scalar(255, 255, 255));
 	vector<vector<int>> label_rgb;
-	label_rgb = get_masked_label_average(&m_color, &m_mask, &m_out);
+
+	if(args.path_color.size() > 0){
+		Mat m_color = imread(args.path_color.c_str());
+		if(m_color.cols == 0){
+			_le << "invalid path:" << args.path_color;
+			return 1;
+		}
+		label_rgb = get_masked_label_average(&m_color, &m_mask, &m_out);
+	}else{
+		label_rgb = get_masked_label_average(NULL, &m_mask, &m_out);
+	}
 	for(int i=0;i<SizePaintdotnetPallet;++i){
 		if(label_rgb[i].size() == 0){
 			printf("%02d\n", i);

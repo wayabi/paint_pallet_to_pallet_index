@@ -18,7 +18,7 @@ public:
 		using namespace boost::program_options;
 		options_description opt("opt");
 		opt.add_options()
-			("path_color", value<std::string>()->required(), "path_color")
+			("path_color", value<std::string>()->default_value(""), "path_color")
 			("path_mask", value<std::string>()->required(), "path_mask")
 			("path_output", value<std::string>()->default_value(""), "path_output")
 		;
