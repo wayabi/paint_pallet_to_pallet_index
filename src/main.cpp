@@ -1,4 +1,3 @@
-#include <iostream>
 #include <unistd.h>
 #include <stdio.h>
 
@@ -39,12 +38,12 @@ map<int,int> load_pallet(const string& path_pallet_csv)
 
 int get_pallet_idx(uint8_t* src, map<int,int>& pallet_map)
 {
-	//BGR
+	//imread() order BGR
 	int idx = *(src+0)*256*256 + *(src+1)*256 + *(src+2);
 	if(pallet_map.count(idx) > 0){
 		return pallet_map[idx];
 	}else{
-		return 255;
+		return -1;
 	}
 }
 
@@ -63,9 +62,11 @@ void convert2pallet_idx(const Mat& m_src, Mat& m_dst, map<int,int> pallet)
 	for(int y=0;y<h;++y){
 		for(int x=0;x<w;++x){
 			int pallet_idx = get_pallet_idx(p_label, pallet);
-			*(p_out+0) = pallet_idx;
-			*(p_out+1) = pallet_idx;
-			*(p_out+2) = pallet_idx;
+			if(pallet_idx >= 0){
+				*(p_out+0) = pallet_idx;
+				*(p_out+1) = pallet_idx;
+				*(p_out+2) = pallet_idx;
+			}
 			p_label += 3;
 			p_out += 3;
 		}
