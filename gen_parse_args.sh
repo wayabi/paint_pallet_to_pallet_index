@@ -1,7 +1,7 @@
 #!/bin/sh
 
 gen_arg_parse_h \
-	path_color,string, \
-	path_mask,string,man \
-	path_output,string, \
+	path_img_label,string,man \
+	path_pallet_csv,string,man \
+	path_img_output,string,man \
 	> ./src/arg_parse.h

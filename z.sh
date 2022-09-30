@@ -1,6 +1,6 @@
 #!/bin/sh
 
 ./a.out \
-	--path_color ./data/0_board.png \
-	--path_mask ./data/0_mask.png \
-	--path_out ./out/0_out.png
+	--path_img_label ./data/label.png \
+	--path_pallet_csv ./data/pallet.csv \
+	--path_img_out ./out/0_out.png

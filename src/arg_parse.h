@@ -9,26 +9,26 @@
 class arg_parse {
 
 public:
-	std::string path_color;
-	std::string path_mask;
-	std::string path_output;
+	std::string path_img_label;
+	std::string path_pallet_csv;
+	std::string path_img_output;
 public:
 	std::string parse(int argc, const char** argv)
 	{
 		using namespace boost::program_options;
 		options_description opt("opt");
 		opt.add_options()
-			("path_color", value<std::string>()->default_value(""), "path_color")
-			("path_mask", value<std::string>()->required(), "path_mask")
-			("path_output", value<std::string>()->default_value(""), "path_output")
+			("path_img_label", value<std::string>()->required(), "path_img_label")
+			("path_pallet_csv", value<std::string>()->required(), "path_pallet_csv")
+			("path_img_output", value<std::string>()->required(), "path_img_output")
 		;
 		variables_map vm;
 		try{
 			store(parse_command_line(argc, argv, opt), vm);
 			notify(vm);
-			path_color = vm["path_color"].as<std::string>();
-			path_mask = vm["path_mask"].as<std::string>();
-			path_output = vm["path_output"].as<std::string>();
+			path_img_label = vm["path_img_label"].as<std::string>();
+			path_pallet_csv = vm["path_pallet_csv"].as<std::string>();
+			path_img_output = vm["path_img_output"].as<std::string>();
 		}catch(std::exception& e){
 			return std::string(e.what());
 		}
@@ -37,9 +37,9 @@ public:
 
 	void print(std::ostream& o)
 	{
-		o << "path_color[std::string]: " << path_color << std::endl;
-		o << "path_mask[std::string]: " << path_mask << std::endl;
-		o << "path_output[std::string]: " << path_output << std::endl;
+		o << "path_img_label[std::string]: " << path_img_label << std::endl;
+		o << "path_pallet_csv[std::string]: " << path_pallet_csv << std::endl;
+		o << "path_img_output[std::string]: " << path_img_output << std::endl;
 	}
 };
 #endif
