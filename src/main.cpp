@@ -40,11 +40,35 @@ map<int,int> load_pallet(const string& path_pallet_csv)
 int get_pallet_idx(uint8_t* src, map<int,int>& pallet_map)
 {
 	//BGR
-	int idx = *(src+0)*256*256 + *(src+1)*256 + *(src+0);
+	int idx = *(src+0)*256*256 + *(src+1)*256 + *(src+2);
 	if(pallet_map.count(idx) > 0){
 		return pallet_map[idx];
 	}else{
 		return 255;
+	}
+}
+
+void convert2pallet_idx(const Mat& m_src, Mat& m_dst, map<int,int> pallet)
+{
+	int w = m_src.cols;
+	int h = m_src.rows;
+	if(m_src.channels() != 3)
+	{
+		_le << "label_img channels must be 3.";
+		return;
+	}
+	uint8_t* p_label = (uint8_t*)m_src.ptr();
+	uint8_t* p_out= (uint8_t*)m_dst.ptr();
+	
+	for(int y=0;y<h;++y){
+		for(int x=0;x<w;++x){
+			int pallet_idx = get_pallet_idx(p_label, pallet);
+			*(p_out+0) = pallet_idx;
+			*(p_out+1) = pallet_idx;
+			*(p_out+2) = pallet_idx;
+			p_label += 3;
+			p_out += 3;
+		}
 	}
 }
 
@@ -70,6 +94,7 @@ int main(int argc, const char** argv)
 
 	Mat m_out(m_label.rows, m_label.cols, CV_8UC3);
 	m_out.setTo(Scalar(255, 255, 255));
+	convert2pallet_idx(m_label, m_out, pallet_map);
 
 	imwrite(args.path_img_output, m_out);
 	_li << "done.";
